@@ -1,8 +1,8 @@
 import os
 from PIL import Image 
 
-from smolagents import CodeAgent, InferenceClientModel, LiteLLMModel, tool, GradioUI
-from smolagents import Tool
+from smolagents import CodeAgent, LiteLLMModel, GradioUI, DuckDuckGoSearchTool
+from smolagents import Tool, tool
 from utils.swarmui_flux_t2i import call_swarmui_api
 from utils.download_image import get_image_from_url
 from dowhen import when
@@ -49,26 +49,12 @@ def download_image_from_url(url: str) -> Image.Image:
     img = get_image_from_url(url)
     return img
 
-
-class GenerateImage(Tool):
-    name = "image_generate_tool"
-    description = "This tool generates an image based on a given text prompt using the flux1.dev model."
-    inputs = {'prompt': {"type": "string", "description": """A descriptive natural language prompt that specifies the desired content and style of the image.
-                                                            For example: "A futuristic city skyline at sunset with flying cars."""}}
-    output_type = "str"
-
-    def __init__(self, **hub_kwargs) -> None:
-
-        super().__init__()
-
-        self.stable_diffusion = self.default_stable_diffusion_checkpoint
-
-        self.hub_kwargs = hub_kwargs
-
-    def forward(self, image, prompt):
-        image_url = call_swarmui_api(prompt)
-
-agent = CodeAgent(tools=[generate_image_with_flux1, download_image_from_url], model=model)
+agent = CodeAgent(tools=[generate_image_with_flux1, 
+                        download_image_from_url, 
+                        # DuckDuckGoSearchTool(),
+                        DuckDuckGoImageSearchTool(),
+                        ], 
+                  model=model)
 
 
 # result = agent.run(
